@@ -8,5 +8,4 @@ import com.nicolas.simpletodo.models.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-
 }
