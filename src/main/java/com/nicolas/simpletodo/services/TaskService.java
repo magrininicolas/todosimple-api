@@ -1,5 +1,7 @@
 package com.nicolas.simpletodo.services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,12 @@ public class TaskService {
 
     public Task findById(Long id) {
         return taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
+    }
+
+    public List<Task> findAllByUserId(Long id) {
+        userService.findById(id);
+
+        return taskRepository.findByUser_Id(id);
     }
 
     @Transactional
@@ -46,4 +54,5 @@ public class TaskService {
             throw new RuntimeException("Deletion cannot succeed. Message: " + e.getMessage());
         }
     }
+
 }
