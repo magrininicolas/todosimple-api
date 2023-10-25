@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.nicolas.simpletodo.models.User;
 import com.nicolas.simpletodo.repositories.UserRepository;
+import com.nicolas.simpletodo.services.exceptions.DataBindingViolationException;
+import com.nicolas.simpletodo.services.exceptions.ObjectNotFoundException;
 
 @Service
 public class UserService {
@@ -14,7 +16,7 @@ public class UserService {
     private UserRepository userRepository;
 
     public User findById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
     }
 
     @Transactional
@@ -26,7 +28,7 @@ public class UserService {
     @Transactional
     public User update(User user) {
         User updatedUser = findById(user.getId());
-        updatedUser.setPassword(updatedUser.getPassword());
+        updatedUser.setPassword(user.getPassword());
         return userRepository.save(updatedUser);
     }
 
@@ -35,7 +37,7 @@ public class UserService {
         try {
             userRepository.delete(user);
         } catch (RuntimeException e) {
-            throw new RuntimeException("Deletion cannot succeed. Message: " + e.getMessage());
+            throw new DataBindingViolationException("Deletion cannot succeed. Message: " + e.getMessage());
         }
     }
 }

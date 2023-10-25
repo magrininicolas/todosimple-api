@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.nicolas.simpletodo.models.Task;
 import com.nicolas.simpletodo.models.User;
 import com.nicolas.simpletodo.repositories.TaskRepository;
+import com.nicolas.simpletodo.services.exceptions.DataBindingViolationException;
+import com.nicolas.simpletodo.services.exceptions.ObjectNotFoundException;
 
 @Service
 public class TaskService {
@@ -20,7 +22,7 @@ public class TaskService {
     private UserService userService;
 
     public Task findById(Long id) {
-        return taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
+        return taskRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Task not found"));
     }
 
     public List<Task> findAllByUserId(Long id) {
@@ -41,7 +43,7 @@ public class TaskService {
     @Transactional
     public Task updateTask(Task task) {
         Task updatedTask = findById(task.getId());
-        updatedTask.setDescription(updatedTask.getDescription());
+        updatedTask.setDescription(task.getDescription());
 
         return taskRepository.save(updatedTask);
     }
@@ -51,7 +53,7 @@ public class TaskService {
         try {
             taskRepository.delete(deletedTask);
         } catch (RuntimeException e) {
-            throw new RuntimeException("Deletion cannot succeed. Message: " + e.getMessage());
+            throw new DataBindingViolationException("Deletion cannot succeed. Message: " + e.getMessage());
         }
     }
 
