@@ -11,7 +11,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -28,26 +27,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @Value("${server.error.include-exception}")
     private boolean printStackTrace;
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException methodArgumentNotValidException,
-            HttpHeaders headers,
-            HttpStatus status,
-            WebRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                "Validation error. Check 'errors' field for details.");
+    // @Override
+    // @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    // protected ResponseEntity<Object> handleMethodArgumentNotValid(
+    //         MethodArgumentNotValidException methodArgumentNotValidException,
+    //         HttpHeaders headers,
+    //         HttpStatus status,
+    //         WebRequest request) {
+    //     ErrorResponse errorResponse = new ErrorResponse(
+    //             HttpStatus.UNPROCESSABLE_ENTITY.value(),
+    //             "Validation error. Check 'errors' field for details.");
 
-        for (FieldError fieldError : methodArgumentNotValidException.getBindingResult().getFieldErrors()) {
-            errorResponse.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
-        }
+    //     for (FieldError fieldError : methodArgumentNotValidException.getBindingResult().getFieldErrors()) {
+    //         errorResponse.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
+    //     }
 
-        return ResponseEntity.unprocessableEntity().headers(headers).body(errorResponse);
-    }
+    //     return ResponseEntity.unprocessableEntity().headers(headers).body(errorResponse);
+    // }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseEntity<Object> handleAllUncaughtException(
+    public ResponseEntity<ErrorResponse> handleAllUncaughtException(
             Exception exception,
             WebRequest request) {
         final String errorMessage = "Unknown error occurred";
@@ -62,7 +62,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<Object> handleDataIntegrityViolationException(
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(
             DataIntegrityViolationException dataIntegrityViolationException,
             WebRequest request) {
         String errorMessage = dataIntegrityViolationException.getMostSpecificCause().getMessage();
@@ -78,7 +78,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public ResponseEntity<Object> handleConstraintViolationException(
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(
             ConstraintViolationException constraintViolationException,
             WebRequest request) {
         log.error("Failed to validate element", constraintViolationException);
@@ -88,7 +88,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<Object> handleObjectNotFoundException(
+    public ResponseEntity<ErrorResponse> handleObjectNotFoundException(
             ObjectNotFoundException objectNotFoundException,
             WebRequest request) {
         log.error("Failed to find the requested entity ", objectNotFoundException);
@@ -98,7 +98,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(DataBindingViolationException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<Object> handleDataBindingViolationException(
+    public ResponseEntity<ErrorResponse> handleDataBindingViolationException(
             DataBindingViolationException dataBindingViolationException,
             WebRequest request) {
         log.error("Failed to proccess the request ", dataBindingViolationException);
@@ -106,7 +106,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildErrorResponse(dataBindingViolationException, HttpStatus.BAD_REQUEST, request);
     }
 
-    private ResponseEntity<Object> buildErrorResponse(
+    private ResponseEntity<ErrorResponse> buildErrorResponse(
             Exception exception,
             HttpStatus httpStatus,
             WebRequest request) {
@@ -114,7 +114,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 request);
     }
 
-    private ResponseEntity<Object> buildErrorResponse(
+    private ResponseEntity<ErrorResponse> buildErrorResponse(
             Exception exception,
             String message,
             HttpStatus httpStatus,
