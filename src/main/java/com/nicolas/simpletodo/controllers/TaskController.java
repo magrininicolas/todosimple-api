@@ -2,8 +2,8 @@ package com.nicolas.simpletodo.controllers;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,16 +26,19 @@ import jakarta.validation.Valid;
 @Validated
 public class TaskController {
 
-    @Autowired
-    private TaskService taskService;
+    private final TaskService taskService;
+
+    TaskController(TaskService taskService) {
+        this.taskService = taskService;
+    }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> findTaskById(@PathVariable Long id) {
+    public ResponseEntity<Task> findTaskById(@PathVariable UUID id) {
         return ResponseEntity.ok().body(taskService.findById(id));
     }
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<List<Task>> findAllTasksByUserId(@PathVariable Long id) {
+    public ResponseEntity<List<Task>> findAllTasksByUserId(@PathVariable UUID id) {
         return ResponseEntity.ok().body(taskService.findAllByUserId(id));
     }
 
@@ -54,7 +57,7 @@ public class TaskController {
 
     @PutMapping("/{id}")
     @Validated
-    public ResponseEntity<Void> updateTask(@Valid @RequestBody Task task, @PathVariable Long id) {
+    public ResponseEntity<Void> updateTask(@Valid @RequestBody Task task, @PathVariable UUID id) {
         task.setId(id);
         taskService.updateTask(task);
 
@@ -62,7 +65,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTask(@PathVariable UUID id) {
 
         taskService.deleteTask(id);
 

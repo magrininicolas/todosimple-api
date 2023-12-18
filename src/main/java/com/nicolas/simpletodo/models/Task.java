@@ -1,6 +1,7 @@
 package com.nicolas.simpletodo.models;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,7 +30,7 @@ public class Task implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "task_id")
-    private Long id;
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, updatable = false)

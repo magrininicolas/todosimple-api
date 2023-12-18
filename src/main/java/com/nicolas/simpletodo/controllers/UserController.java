@@ -1,8 +1,8 @@
 package com.nicolas.simpletodo.controllers;
 
 import java.net.URI;
+import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,11 +27,14 @@ import jakarta.validation.Valid;
 @Validated
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> findById(@PathVariable Long id) {
+    public ResponseEntity<User> findById(@PathVariable UUID id) {
         User user = userService.findById(id);
 
         return ResponseEntity.ok().body(user);
@@ -52,7 +55,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     @Validated(UpdateUser.class)
-    public ResponseEntity<Void> updateUser(@Valid @RequestBody User user, @PathVariable Long id) {
+    public ResponseEntity<Void> updateUser(@Valid @RequestBody User user, @PathVariable UUID id) {
         user.setId(id);
         userService.update(user);
 
@@ -60,7 +63,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         userService.delete(id);
 
         return ResponseEntity.noContent().build();

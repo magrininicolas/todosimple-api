@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -44,7 +45,7 @@ public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long id;
+    private UUID id;
 
     @Column(name = "username", length = 100, nullable = false, unique = true)
     @NotNull(groups = CreateUser.class)
@@ -69,11 +70,11 @@ public class User implements Serializable {
     @Column(name = "profile", nullable = false)
     private Set<Integer> profiles = new HashSet<>();
 
-    public Set<ProfileEnum> getProfiles(){
+    public Set<ProfileEnum> getProfiles() {
         return profiles.stream().map(ProfileEnum::toEnum).collect(Collectors.toSet());
     }
 
-    public void addProfile(ProfileEnum profileEnum){
+    public void addProfile(ProfileEnum profileEnum) {
         profiles.add(profileEnum.getCode());
     }
 

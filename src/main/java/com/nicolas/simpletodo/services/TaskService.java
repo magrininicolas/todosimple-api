@@ -1,8 +1,8 @@
 package com.nicolas.simpletodo.services;
 
 import java.util.List;
+import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,17 +15,20 @@ import com.nicolas.simpletodo.services.exceptions.ObjectNotFoundException;
 @Service
 public class TaskService {
 
-    @Autowired
-    private TaskRepository taskRepository;
+    private final TaskRepository taskRepository;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    public Task findById(Long id) {
+    TaskService(TaskRepository taskRepository, UserService userService) {
+        this.taskRepository = taskRepository;
+        this.userService = userService;
+    }
+
+    public Task findById(UUID id) {
         return taskRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Task not found"));
     }
 
-    public List<Task> findAllByUserId(Long id) {
+    public List<Task> findAllByUserId(UUID id) {
         userService.findById(id);
 
         return taskRepository.findByUser_Id(id);
@@ -48,7 +51,8 @@ public class TaskService {
         return taskRepository.save(updatedTask);
     }
 
-    public void deleteTask(Long id) {
+    @Transactional
+    public void deleteTask(UUID id) {
         Task deletedTask = findById(id);
         try {
             taskRepository.delete(deletedTask);

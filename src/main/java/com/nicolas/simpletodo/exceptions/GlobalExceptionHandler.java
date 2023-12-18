@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,23 +28,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @Value("${server.error.include-exception}")
     private boolean printStackTrace;
 
-    // @Override
-    // @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    // protected ResponseEntity<Object> handleMethodArgumentNotValid(
-    //         MethodArgumentNotValidException methodArgumentNotValidException,
-    //         HttpHeaders headers,
-    //         HttpStatus status,
-    //         WebRequest request) {
-    //     ErrorResponse errorResponse = new ErrorResponse(
-    //             HttpStatus.UNPROCESSABLE_ENTITY.value(),
-    //             "Validation error. Check 'errors' field for details.");
+    @Override
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Validation error. Check 'errors' field for details.");
 
-    //     for (FieldError fieldError : methodArgumentNotValidException.getBindingResult().getFieldErrors()) {
-    //         errorResponse.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
-    //     }
+        for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
+            errorResponse.addValidationError(fieldError.getField(), fieldError.getDefaultMessage());
+        }
 
-    //     return ResponseEntity.unprocessableEntity().headers(headers).body(errorResponse);
-    // }
+        return ResponseEntity.unprocessableEntity().headers(headers).body(errorResponse);
+    }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -108,7 +109,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(
             Exception exception,
-            HttpStatus httpStatus,
+            HttpStatusCode httpStatus,
             WebRequest request) {
         return buildErrorResponse(exception, exception.getMessage(), httpStatus,
                 request);
@@ -117,7 +118,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<ErrorResponse> buildErrorResponse(
             Exception exception,
             String message,
-            HttpStatus httpStatus,
+            HttpStatusCode httpStatus,
             WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(httpStatus.value(), message);
 
