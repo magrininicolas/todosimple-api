@@ -30,23 +30,23 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers("/").permitAll()
                         .anyRequest().authenticated())
-                .sessionManagement(mgmt -> mgmt.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(sessMgmt -> sessMgmt.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration().applyPermitDefaultValues();
-        configuration.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE"));
+        configuration.setAllowedMethods(Arrays.asList("*"));
 
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }
 
     @Bean
-    BCryptPasswordEncoder bCryptPasswordEncoder(){
+    BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }
